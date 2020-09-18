@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"strings"
 	"sync/atomic"
 	"time"
@@ -26,51 +27,47 @@ func main() {
 		return
 	}
 
-	files, err := ioutil.ReadDir(*path)
-	if err != nil {
-		panic(err)
-		return
-	}
-
 	var num int32
-	for _, f := range files {
+	filepath.Walk(*path, func(path string, info os.FileInfo, err error) error {
 
-		if f == nil || f.IsDir() {
-			continue
+		if info == nil || info.IsDir() {
+			return nil
 		}
 
 		if *ff != "" {
-			if !strings.HasSuffix(f.Name(), *ff) {
-				continue
+			if !strings.HasSuffix(info.Name(), *ff) {
+				return nil
 			}
 		}
 
 		if int(num) < *thread {
 			atomic.AddInt32(&num, 1)
-			go replace(f, &num, *from, *to, *v)
+			go replace(path, &num, *from, *to, *v)
 		} else {
 			atomic.AddInt32(&num, 1)
-			replace(f, &num, *from, *to, *v)
+			replace(path, &num, *from, *to, *v)
 		}
-	}
+
+		return nil
+	})
 
 	for num > 0 {
 		time.Sleep(time.Millisecond * 10)
 	}
 }
 
-func replace(f os.FileInfo, num *int32, from string, to string, show bool) {
+func replace(f string, num *int32, from string, to string, show bool) {
 
 	defer atomic.AddInt32(num, -1)
 
-	data, err := ioutil.ReadFile(f.Name())
+	data, err := ioutil.ReadFile(f)
 	if err != nil {
 		panic(err)
 	}
 	str := string(data)
 	str = strings.Replace(str, from, to, -1)
 
-	out, err := os.Create(f.Name())
+	out, err := os.Create(f)
 	if err != nil {
 		panic(err)
 	}
@@ -79,6 +76,6 @@ func replace(f os.FileInfo, num *int32, from string, to string, show bool) {
 	out.WriteString(str)
 
 	if show {
-		fmt.Println("done " + f.Name())
+		fmt.Println("done " + f)
 	}
 }
