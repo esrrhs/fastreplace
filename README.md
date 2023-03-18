@@ -6,7 +6,7 @@
 [<img src="https://img.shields.io/github/v/release/esrrhs/fastreplace">](https://github.com/esrrhs/fastreplace/releases)
 [<img src="https://img.shields.io/github/downloads/esrrhs/fastreplace/total">](https://github.com/esrrhs/fastreplace/releases)
 [<img src="https://img.shields.io/docker/pulls/esrrhs/fastreplace">](https://hub.docker.com/repository/docker/esrrhs/fastreplace)
-[<img src="https://img.shields.io/github/workflow/status/esrrhs/fastreplace/Go">](https://github.com/esrrhs/fastreplace/actions)
+[<img src="https://img.shields.io/github/actions/workflow/status/esrrhs/fastreplace/go.yml?branch=master">](https://github.com/esrrhs/fastreplace/actions)
 
 多线程文件替换工具
 
