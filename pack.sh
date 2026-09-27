@@ -7,8 +7,8 @@ export GO111MODULE=on
 #go tool dist list
 build_list=$(go tool dist list)
 
-rm pack -rf
-rm pack.zip -f
+rm -rf pack
+rm -f pack.zip
 mkdir pack
 
 for line in $build_list; do
@@ -36,7 +36,7 @@ for line in $build_list; do
       exit 1
     fi
     mv ${NAME}_"${os}"_"${arch}"".zip" pack/
-    rm $NAME".exe" -f
+    rm -f $NAME".exe"
   else
     zip ${NAME}_"${os}"_"${arch}"".zip" $NAME
     if [ $? -ne 0 ]; then
@@ -44,7 +44,7 @@ for line in $build_list; do
       exit 1
     fi
     mv ${NAME}_"${os}"_"${arch}"".zip" pack/
-    rm $NAME -f
+    rm -f $NAME
   fi
   echo "os="$os" arch="$arch" done build"
 done

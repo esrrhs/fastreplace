@@ -1,9 +1,12 @@
-FROM golang AS build-env
+FROM golang:1.27.1-bookworm AS build
 
-RUN GO111MODULE=off go get -u github.com/esrrhs/fastreplace
-RUN GO111MODULE=off go get -u github.com/esrrhs/fastreplace/...
-RUN GO111MODULE=off go install github.com/esrrhs/fastreplace
+WORKDIR /src
+COPY go.mod ./
+RUN go mod download
+COPY . .
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o /out/fastreplace .
 
-FROM debian
-COPY --from=build-env /go/bin/fastreplace .
-WORKDIR ./
+FROM debian:bookworm-slim
+WORKDIR /app
+COPY --from=build /out/fastreplace ./fastreplace
+ENTRYPOINT ["./fastreplace"]
