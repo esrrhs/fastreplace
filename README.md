@@ -72,7 +72,7 @@ Usage of ./fastreplace:
 ./pack.sh
 ```
 
-Cross-platform archives are written to `pack/`. Pushing a version bump in `version.go` to `master` triggers an automatic GitHub Release.
+Cross-platform archives are written to `pack/`. The **Release** workflow watches `version.go`: when its version string changes on `master` (and the tag does not exist yet), CI runs `./pack.sh` and publishes a GitHub Release.
 
 ## License
 

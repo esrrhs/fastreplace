@@ -1,0 +1,140 @@
+name: Release
+
+on:
+  push:
+    branches: [ "master" ]
+    tags: [ "*" ]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version tag (e.g. 0.3)'
+        required: false
+
+permissions:
+  contents: write
+
+jobs:
+  check-version:
+    name: Check Version Change
+    runs-on: ubuntu-latest
+    outputs:
+      should_release: ${{ steps.check.outputs.should_release }}
+      version: ${{ steps.check.outputs.version }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Check if Version Changed
+        id: check
+        run: |
+          set -euo pipefail
+
+          read_version() {
+            sed -n 's/.*const Version = "\(.*\)".*/\1/p' version.go | head -n1
+          }
+
+          # Case 1: manual workflow_dispatch
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            INPUT_VER="${{ inputs.version }}"
+            if [ -n "$INPUT_VER" ]; then
+              TAG="${INPUT_VER#v}"
+            else
+              TAG="$(read_version)"
+              TAG="${TAG#v}"
+            fi
+            echo "Triggered manually: $TAG"
+            echo "should_release=true" >> "$GITHUB_OUTPUT"
+            echo "version=$TAG" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # Case 2: git tag push
+          if [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            TAG="${{ github.ref_name }}"
+            TAG="${TAG#v}"
+            echo "Triggered by tag push: $TAG"
+            echo "should_release=true" >> "$GITHUB_OUTPUT"
+            echo "version=$TAG" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # Case 3: push to master — only when version.go changed
+          TAG="$(read_version)"
+          TAG="${TAG#v}"
+          echo "Current code version: $TAG"
+
+          if [ -z "$TAG" ]; then
+            echo "No version found in version.go, skipping release."
+            echo "should_release=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if git rev-parse "$TAG" >/dev/null 2>&1 || git ls-remote --tags origin "refs/tags/$TAG" | grep -q "$TAG"; then
+            echo "Tag $TAG already exists on remote. Skipping release."
+            echo "should_release=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          BEFORE="${{ github.event.before }}"
+          if [ -n "$BEFORE" ] && [ "$BEFORE" != "0000000000000000000000000000000000000000" ]; then
+            if ! git diff --name-only "$BEFORE" "${{ github.sha }}" | grep -q '^version.go$'; then
+              echo "version.go was not modified in this push. Skipping release."
+              echo "should_release=false" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+
+            PREV=""
+            if git cat-file -e "${BEFORE}:version.go" 2>/dev/null; then
+              PREV="$(git show "${BEFORE}:version.go" | sed -n 's/.*const Version = "\(.*\)".*/\1/p' | head -n1)"
+              PREV="${PREV#v}"
+            fi
+            if [ -n "$PREV" ] && [ "$PREV" = "$TAG" ]; then
+              echo "Version value unchanged ($TAG), skipping release."
+              echo "should_release=false" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+          fi
+
+          echo "Version changed to $TAG and tag does not exist. Triggering automatic release!"
+          echo "should_release=true" >> "$GITHUB_OUTPUT"
+          echo "version=$TAG" >> "$GITHUB_OUTPUT"
+
+  release:
+    name: Build and Publish Release
+    needs: check-version
+    if: needs.check-version.outputs.should_release == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v5
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+
+      - name: Install zip
+        run: sudo apt-get update && sudo apt-get install -y zip
+
+      - name: Build release artifacts
+        run: chmod +x pack.sh && ./pack.sh
+
+      - name: Generate checksums
+        run: |
+          cd pack
+          sha256sum *.zip > checksums.txt
+          cat checksums.txt
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.check-version.outputs.version }}
+          name: ${{ needs.check-version.outputs.version }}
+          files: |
+            pack.zip
+            pack/*.zip
+            pack/checksums.txt
+          generate_release_notes: true
+          fail_on_unmatched_files: true
