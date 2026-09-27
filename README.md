@@ -2,7 +2,6 @@
 
 [<img src="https://img.shields.io/github/license/esrrhs/fastreplace">](https://github.com/esrrhs/fastreplace)
 [<img src="https://img.shields.io/github/languages/top/esrrhs/fastreplace">](https://github.com/esrrhs/fastreplace)
-[![Go Report Card](https://goreportcard.com/badge/github.com/esrrhs/fastreplace)](https://goreportcard.com/report/github.com/esrrhs/fastreplace)
 [<img src="https://img.shields.io/github/v/release/esrrhs/fastreplace">](https://github.com/esrrhs/fastreplace/releases)
 [<img src="https://img.shields.io/github/downloads/esrrhs/fastreplace/total">](https://github.com/esrrhs/fastreplace/releases)
 [<img src="https://img.shields.io/docker/pulls/esrrhs/fastreplace">](https://hub.docker.com/repository/docker/esrrhs/fastreplace)
@@ -17,7 +16,7 @@
 ```
 * 更多参数参考-h
 ```
-Usage of fastreplace.exe:
+Usage of ./fastreplace:
   -file string
         file format
   -from string
@@ -29,4 +28,6 @@ Usage of fastreplace.exe:
   -to string
         new string
   -v    show info
+  -version
+        show version
 ```
