@@ -7,19 +7,19 @@
 [<img src="https://img.shields.io/docker/pulls/esrrhs/fastreplace">](https://hub.docker.com/repository/docker/esrrhs/fastreplace)
 [<img src="https://img.shields.io/github/actions/workflow/status/esrrhs/fastreplace/go.yml?branch=master">](https://github.com/esrrhs/fastreplace/actions)
 
-> **A fast multithreaded CLI tool that replaces text across files under a directory.**
+> **多线程文件内容批量替换命令行工具。**
 
-[English](README.md) | [Chinese](README_CN.md)
+[English](README.md) | [中文说明](README_CN.md)
 
 ---
 
-## Overview
+## 简介
 
-**fastreplace** walks a path (recursively), optionally filters by file suffix, and replaces all occurrences of a string with another — using a bounded worker pool for speed.
+**fastreplace** 递归遍历目录，可按文件后缀过滤，把匹配到的字符串全部替换成新内容；内部用有界协程池并行处理，适合大批量文本替换。
 
-## Install
+## 安装
 
-Download a prebuilt binary from the **[Releases](https://github.com/esrrhs/fastreplace/releases)** page, or build from source:
+从 **[Releases](https://github.com/esrrhs/fastreplace/releases)** 下载预编译二进制，或自行编译：
 
 ```bash
 git clone https://github.com/esrrhs/fastreplace.git
@@ -27,32 +27,32 @@ cd fastreplace
 go build -o fastreplace .
 ```
 
-Docker:
+Docker：
 
 ```bash
 docker pull esrrhs/fastreplace
 ```
 
-## Usage
+## 使用
 
-Replace `aaa` with `bbb` in every `.txt` file under the current directory:
+遍历当前目录及子目录的所有 `.txt` 文件，把内容 `aaa` 改为 `bbb`：
 
 ```bash
 ./fastreplace -path ./ -file .txt -from aaa -to bbb
 ```
 
-Show version:
+查看版本：
 
 ```bash
 ./fastreplace -version
 ```
 
-More flags:
+更多参数：
 
 ```text
 Usage of ./fastreplace:
   -file string
-        file format (suffix filter, e.g. .txt)
+        file format（后缀过滤，如 .txt）
   -from string
         old string
   -path string
@@ -66,14 +66,14 @@ Usage of ./fastreplace:
         show version
 ```
 
-## Build release packages
+## 打包发布
 
 ```bash
 ./pack.sh
 ```
 
-Cross-platform archives are written to `pack/`. Pushing a version bump in `version.go` to `master` triggers an automatic GitHub Release.
+跨平台压缩包输出到 `pack/`。在 `version.go` 中 bump 版本并推送到 `master` 后，CI 会自动创建 GitHub Release。
 
-## License
+## 许可
 
-MIT — see [LICENSE](LICENSE).
+MIT — 见 [LICENSE](LICENSE)。
