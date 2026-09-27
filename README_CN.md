@@ -72,7 +72,7 @@ Usage of ./fastreplace:
 ./pack.sh
 ```
 
-跨平台压缩包输出到 `pack/`。在 `version.go` 中 bump 版本并推送到 `master` 后，CI 会自动创建 GitHub Release。
+跨平台压缩包输出到 `pack/`。**Release** 流水线会监视 `version.go`：当其版本号在 `master` 上发生变更（且对应 tag 尚不存在）时，CI 会执行 `./pack.sh` 并发布 GitHub Release。
 
 ## 许可
 
