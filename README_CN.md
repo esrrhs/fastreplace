@@ -41,6 +41,12 @@ docker pull esrrhs/fastreplace
 ./fastreplace -path ./ -file .txt -from aaa -to bbb
 ```
 
+预览会命中的文件及替换次数，不写入文件：
+
+```bash
+./fastreplace -path ./ -file .txt -from aaa -to bbb -dry-run
+```
+
 查看版本：
 
 ```bash
@@ -51,6 +57,8 @@ docker pull esrrhs/fastreplace
 
 ```text
 Usage of ./fastreplace:
+  -dry-run
+        preview matches without writing files（预览匹配，不写入文件）
   -file string
         file format（后缀过滤，如 .txt）
   -from string

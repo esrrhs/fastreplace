@@ -41,6 +41,12 @@ Replace `aaa` with `bbb` in every `.txt` file under the current directory:
 ./fastreplace -path ./ -file .txt -from aaa -to bbb
 ```
 
+Preview matches and counts without writing files:
+
+```bash
+./fastreplace -path ./ -file .txt -from aaa -to bbb -dry-run
+```
+
 Show version:
 
 ```bash
@@ -51,6 +57,8 @@ More flags:
 
 ```text
 Usage of ./fastreplace:
+  -dry-run
+        preview matches without writing files
   -file string
         file format (suffix filter, e.g. .txt)
   -from string
